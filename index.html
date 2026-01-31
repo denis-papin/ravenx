@@ -1,11 +1,284 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Raven X</title>
+
+  <style>
+    :root {
+      --bg: #0b0f1a;
+      --panel: rgba(255, 255, 255, 0.06);
+      --text: rgba(255, 255, 255, 0.92);
+      --muted: rgba(255, 255, 255, 0.70);
+      --border: rgba(255, 255, 255, 0.12);
+      --shadow: 0 10px 30px rgba(0,0,0,0.35);
+      --radius: 18px;
+      --gap: 22px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:
+              radial-gradient(1200px 800px at 20% 10%, rgba(86, 110, 255, 0.15), transparent 60%),
+              radial-gradient(1000px 700px at 80% 30%, rgba(0, 255, 255, 0.08), transparent 60%),
+              var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+    }
+
+    header {
+      padding: 42px 18px 18px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: 38px;
+      letter-spacing: 0.4px;
+    }
+
+    header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 18px;
+      max-width: 70ch;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 18px 18px 64px;
+    }
+
+    .chapter {
+      margin: 36px 0 56px;
+      padding: 22px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .chapter h2 {
+      margin: 0 0 18px;
+      font-size: 26px;
+      letter-spacing: 0.3px;
+    }
+
+    .block {
+      display: flex;
+      align-items: center;
+      gap: var(--gap);
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: calc(var(--radius) - 6px);
+      background: rgba(0,0,0,0.18);
+      margin-bottom: 16px;
+    }
+
+    .block:last-child { margin-bottom: 0; }
+
+    .block img {
+      width: 320px;
+      max-width: 44vw;
+      height: auto;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      box-shadow: 0 12px 20px rgba(0,0,0,0.35);
+      display: block;
+      cursor: zoom-in;
+      transition: transform 0.15s ease;
+    }
+
+    .block img:hover {
+      transform: scale(1.02);
+    }
+
+    .block .text {
+      font-size: 18px;
+      max-width: 70ch;
+    }
+
+    .block .meta {
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .image-right { flex-direction: row-reverse; }
+
+    @media (max-width: 780px) {
+      h1 { font-size: 30px; }
+      .block {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .block img {
+        width: 100%;
+        max-width: 100%;
+      }
+      .image-right { flex-direction: column; }
+    }
+
+    footer {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 18px;
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+      opacity: 0.85;
+    }
+
+    /* ===== POPUP IMAGE FULLSCREEN ===== */
+
+    #image-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 8, 20, 0.94);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      cursor: zoom-out;
+      backdrop-filter: blur(6px);
+    }
+
+    #image-modal.hidden {
+      display: none;
+    }
+
+    #image-modal img {
+      max-width: 92vw;
+      max-height: 92vh;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.18);
+      box-shadow: 0 30px 60px rgba(0,0,0,0.65);
+      animation: zoomIn 0.25s ease-out;
+    }
+
+    @keyframes zoomIn {
+      from {
+        transform: scale(0.96);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+  </style>
 </head>
+
 <body>
+<header>
   <h1>Bienvenue dans l'univers de Raven X</h1>
-  <p>Une BD de science-fiction sur le sacrifice, l'âme et l'humanité.</p>
+  <p>Une production RX entertainment & ChatGPT 5.2.</p>
+</header>
+
+<main>
+  <div id="content"></div>
+</main>
+
+<footer>
+  Raven X — lecture cinématique HTML
+</footer>
+
+<!-- POPUP IMAGE -->
+<div id="image-modal" class="hidden">
+  <img id="image-modal-img" alt="Agrandissement" />
+</div>
+
+<script src="chapters.js" ></script>
+<script>
+
+
+  // ========= POPUP =========
+  const modal = document.getElementById("image-modal");
+  const modalImg = document.getElementById("image-modal-img");
+
+  function openImageModal(src, alt) {
+    modalImg.src = src;
+    modalImg.alt = alt || "";
+    modal.classList.remove("hidden");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeImageModal() {
+    modal.classList.add("hidden");
+    modalImg.src = "";
+    document.body.style.overflow = "";
+  }
+
+  modal.addEventListener("click", closeImageModal);
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      closeImageModal();
+    }
+  });
+
+  // ========= RENDU =========
+  const container = document.getElementById("content");
+
+  function safeOrientation(value) {
+    return value === "image-right" ? "image-right" : "image-left";
+  }
+
+  function render() {
+    container.innerHTML = "";
+
+    chapters.forEach((chapter, chapterIndex) => {
+      const chapterDiv = document.createElement("section");
+      chapterDiv.className = "chapter";
+
+      const title = document.createElement("h2");
+      title.textContent = chapter.title || `Chapitre ${chapterIndex + 1}`;
+      chapterDiv.appendChild(title);
+
+      chapter.blocks.forEach((block, blockIndex) => {
+        const blockDiv = document.createElement("article");
+        blockDiv.className = `block ${safeOrientation(block.orientation)}`;
+
+        const img = document.createElement("img");
+        img.src = block.image;
+        img.alt = `Illustration ${blockIndex + 1}`;
+        img.loading = "lazy";
+
+        img.addEventListener("click", () => {
+          openImageModal(block.image, img.alt);
+        });
+
+        const textWrap = document.createElement("div");
+
+        const text = document.createElement("div");
+        text.className = "text";
+        text.textContent = block.text || "";
+
+        const meta = document.createElement("div");
+        meta.className = "meta";
+        meta.textContent = `Image : ${block.image}`;
+
+        textWrap.appendChild(text);
+        textWrap.appendChild(meta);
+
+        blockDiv.appendChild(img);
+        blockDiv.appendChild(textWrap);
+
+        chapterDiv.appendChild(blockDiv);
+      });
+
+      container.appendChild(chapterDiv);
+    });
+  }
+
+  render();
+</script>
 </body>
 </html>
